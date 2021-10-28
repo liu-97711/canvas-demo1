@@ -1,51 +1,100 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Canvas画板</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <canvas id="canvas"></canvas>
     <script>
-        //画线
-        var canvas = document.getElementById("canvas");
-        //获取屏幕宽高
-        canvas.height = document.documentElement.clientHeight;;
-        canvas.width = document.documentElement.clientWidth;
+      //画线
+      var canvas = document.getElementById("canvas");
+      //获取屏幕宽高
+      canvas.height = document.documentElement.clientHeight;
+      canvas.width = document.documentElement.clientWidth;
+      var ctx = canvas.getContext("2d");
 
-        
-      
-        var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "rgb(255,165,0)";
+      ctx.strokeStyle = "green";
+      ctx.lineWidth = 4;
+      let painting = false;
+      var last;
+      let isTouchDevice = "ontouchstart" in document.documentElement; //用来判断当前设备是否为触摸屏设备
 
-        ctx.fillStyle = "green";
-        ctx.strokeStyle = 'none';
+      //画线
+      function drawLine(x1, y1, x2, y2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.closePath();
+        ctx.stroke();
+      }
 
-        let painting = false;
-        canvas.onmousedown = () =>{
-            painting = true;
-        }
-        
+      if (isTouchDevice) {
+        canvas.ontouchstart = (e) => {
+          let x = e.touches[0].clientX;
+          let y = e.touches[0].clientY;
+          last = [x, y];
+        };
+        canvas.ontouchmove = (e) => {
+          drawLine(
+            last[0],
+            last[1],
+            e.touches[0].clientX,
+            e.touches[0].clientY
+          );
+          last = [e.touches[0].clientX, e.touches[0].clientY];
+        };
+      } else {
+        canvas.onmousedown = (e) => {
+          painting = true;
+          last = [e.clientX, e.clientY];
+        };
 
         canvas.onmousemove = (e) => {
-            if(painting === true){
-                ctx.beginPath();
-                ctx.arc(e.clientX, e.clientY, 5 , 0 , Math.PI * 2);
-                ctx.stroke();
-                ctx.fill();
-            }else{
-                
-            }
-        }
+          if (painting === true) {
+            drawLine(last[0], last[1], e.clientX, e.clientY);
+            last = [e.clientX, e.clientY];
+          }
+        };
 
-        canvas.onmouseup = () =>{
-            painting = false;
-        }
+        canvas.onmouseup = () => {
+          painting = false;
+        };
+      }
 
+      //  以下代码可以实现在PC及移动设备上画点
+      //   if (isTouchDevice) {
+      //     canvas.ontouchmove = (e) => {
+      //       let x = e.touches[0].clientX;
+      //       let y = e.touches[0].clientY;
+      //       ctx.beginPath();
+      //       ctx.arc(x, y, 10, 0, Math.PI * 2);
+      //       ctx.stroke();
+      //       ctx.fill();
+      //     };
+      //   } else {
+      //     canvas.onmousedown = () => {
+      //       painting = true;
+      //     };
 
-      
+      //     canvas.onmousemove = (e) => {
+      //       if (painting === true) {
+      //         ctx.beginPath();
+      //         ctx.arc(e.clientX, e.clientY, 10, 0, Math.PI * 2);
+      //         ctx.stroke();
+      //         ctx.fill();
+      //       } else {
+      //       }
+      //     };
+
+      //     canvas.onmouseup = () => {
+      //       painting = false;
+      //     };
+      //   }
     </script>
-</body>
+  </body>
 </html>
